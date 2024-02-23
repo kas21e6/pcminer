@@ -1,7 +1,7 @@
 from bitcoinrpc.authproxy import JSONRPCException
 from rich import print
-from Miner import Miner
-from Connection import Connection
+from src.Miner import Miner
+from src.Connection import Connection
 
 
 class PcMiner:
