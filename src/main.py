@@ -3,6 +3,7 @@ import time
 from pprint import pprint
 
 from bitcoinlib.transactions import Transaction
+from bitcoinlib.blocks import Block
 from bitcoinrpc.authproxy import JSONRPCException
 from rich import print
 
@@ -31,6 +32,7 @@ class PcMiner:
             #     info["coinbasevalue"],
             # )
             # print("previous block hash: ", info["previousblockhash"])
+            # print("height: ", info["height"])
 
             # Create the Coinbase Transaction
             tx = Transaction(coinbase=False)
@@ -63,12 +65,26 @@ class PcMiner:
                 "nonce": 0,
             }
 
-            pprint(header)
+            # pprint(header)
 
             # Mine the block
             miner = Miner(info["bits"])
+            winning_nonce, winning_hash = miner.mine(header)
 
-            miner.mine(header)
+            block = Block(
+                block_hash=winning_hash.hex(),
+                version=header["version"],
+                prev_block=header["prev_block"],
+                merkle_root=header["merkle_root"],
+                time=header["time"],
+                bits=header["bits"],
+                nonce=winning_nonce,
+                height=info["height"],
+            )
+
+            pprint(block.as_dict())
+
+            # Create the block
 
         except JSONRPCException as json_exception:
             print("A JSON RPC Exception occurred: ", json_exception)

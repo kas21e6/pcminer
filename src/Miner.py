@@ -19,7 +19,7 @@ class Miner:
 
                 if hash[::-1] < self.target:
                     print("Success with nonce", nonce)
-                    break
+                    return (nonce, hash)
 
                 nonce += 1
         except Exception as e:
