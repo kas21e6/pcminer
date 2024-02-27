@@ -7,7 +7,6 @@ class Connection:
         self.rpc_password = "b"
         self.rpc_host = "localhost"
         self.rpc_port = "8332"  # default port for Bitcoin's mainnet
-        self.rpc_connection = None
 
     def connect(self):
         return AuthServiceProxy(
