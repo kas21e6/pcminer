@@ -35,7 +35,7 @@ class PcMiner:
 
             # Create block header
             header = CBlockHeader(
-                2,
+                4,
                 bytes.fromhex(info["previousblockhash"])[::-1],
                 merkle_root[::-1],
                 timestamp,
