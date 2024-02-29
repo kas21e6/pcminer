@@ -1,4 +1,3 @@
-import hashlib
 import io
 import struct
 import traceback
@@ -15,6 +14,7 @@ class Miner:
         time = cast(int, header.nTime)
         bits = cast(int, header.nBits)
         nonce = cast(int, header.nNonce)
+        bTarget = bytes.fromhex(target)
 
         try:
             f = io.BytesIO()
@@ -31,7 +31,7 @@ class Miner:
                 print("Hash:", hash[::-1].hex())
                 print("With nonce", nonce)
 
-                if hash[::-1] < bytes.fromhex(target):
+                if hash[::-1] < bTarget:
                     print("Success with nonce", nonce)
 
                     return (

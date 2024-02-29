@@ -25,25 +25,29 @@ class PcMiner:
                 {"mode": "template", "rules": ["segwit"]}
             )
 
-            tx = create_coinbase(
-                block_template["height"], block_template["coinbasevalue"]
-            )
+            coinbasevalue = block_template["coinbasevalue"]
+            height = block_template["height"]
+            previousblockhash = block_template["previousblockhash"]
+            target = block_template["target"]
+            bits = block_template["bits"]
+
+            tx = create_coinbase(height, coinbasevalue)
             merkle_root = get_merkle_root([tx])
             timestamp = int(time.time())
 
             # Create block header
             header = CBlockHeader(
                 4,
-                bytes.fromhex(block_template["previousblockhash"])[::-1],
+                bytes.fromhex(previousblockhash)[::-1],
                 merkle_root,
                 timestamp,
-                int(block_template["bits"], 16),
+                int(bits, 16),
                 0,
             )
 
             # Find the winning nonce
             miner = Miner()
-            winning_block_header, _hash = miner.mine(header, block_template["target"])
+            winning_block_header, _hash = miner.mine(header, target)
 
             # Create the block
             block = CBlock(
