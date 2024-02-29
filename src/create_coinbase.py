@@ -10,7 +10,6 @@ def bytes_needed(n):
 
 
 def create_coinbase(block_height, output_value):
-    print("output_value", output_value)
     # block_height as bytes
     block_height_bytes = block_height.to_bytes(
         bytes_needed(block_height), byteorder="little"

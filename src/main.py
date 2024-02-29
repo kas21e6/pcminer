@@ -1,15 +1,15 @@
 import io
 import time
-from pprint import pprint
+import traceback
 
+from bitcoin.core import CBlock, CBlockHeader
 from bitcoinrpc.authproxy import JSONRPCException
 from rich import print
-from bitcoin.core import CBlockHeader, CBlock
 
 from Connection import Connection
-from Miner import Miner
 from create_coinbase import create_coinbase
 from get_merkle_root import get_merkle_root
+from Miner import Miner
 
 
 class PcMiner:
@@ -19,40 +19,43 @@ class PcMiner:
 
     def run(self):
         print("PcMiner is running")
+
         try:
-            info = self.connection.getblocktemplate(
+            block_template = self.connection.getblocktemplate(
                 {"mode": "template", "rules": ["segwit"]}
             )
 
-            tx = create_coinbase(info["height"], info["coinbasevalue"])
-
+            tx = create_coinbase(
+                block_template["height"], block_template["coinbasevalue"]
+            )
             merkle_root = get_merkle_root([tx])
-
-            print("Merkle root: ", merkle_root.hex())
-
-            # Get current timestamp
             timestamp = int(time.time())
 
             # Create block header
             header = CBlockHeader(
                 4,
-                bytes.fromhex(info["previousblockhash"])[::-1],
-                merkle_root[::-1],
+                bytes.fromhex(block_template["previousblockhash"])[::-1],
+                merkle_root,
                 timestamp,
-                int(info["bits"], 16),
+                int(block_template["bits"], 16),
                 0,
             )
 
             # Find the winning nonce
-            miner = Miner(info["bits"])
-            version, prev_block, merkle_root, time_, bits, nonce = miner.mine(header)
+            miner = Miner()
+            winning_block_header, _hash = miner.mine(header, block_template["target"])
 
             # Create the block
             block = CBlock(
-                version, prev_block, merkle_root[::-1], time_, bits, nonce, [tx]
+                winning_block_header.nVersion,
+                winning_block_header.hashPrevBlock,
+                winning_block_header.hashMerkleRoot,
+                winning_block_header.nTime,
+                winning_block_header.nBits,
+                winning_block_header.nNonce,
+                [tx],
             )
 
-            # Submit the block
             f = io.BytesIO()
             block.stream_serialize(f)
             serialized_block = f.getvalue()
@@ -67,6 +70,7 @@ class PcMiner:
             print("A JSON RPC Exception occurred: ", json_exception)
         except Exception as general_exception:
             print("An error occurred: ", general_exception)
+            traceback.print_exc()
 
 
 if __name__ == "__main__":
