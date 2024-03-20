@@ -1,0 +1,9 @@
+# bitcoinrpc/authproxy.pyi
+
+from typing import Dict, Any
+
+class JSONRPCException(Exception): ...
+
+class AuthServiceProxy:
+    def __init__(self, service_url: str) -> None: ...
+    def getblocktemplate(self, template_request: Dict[str, Any]) -> Dict[str, Any]: ...
